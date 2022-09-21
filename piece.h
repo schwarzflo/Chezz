@@ -24,8 +24,12 @@ class Piece {
         void pawn_m(Chessboard&, std::string&, size_t&);
         void king_m(Chessboard&, std::string&, size_t&);
         void knight_m(Chessboard&, std::string&, size_t&);
-        void update_moves(std::vector<Piece>, Chessboard&, std::string, Piece);
+        void bishop_m(Chessboard&, std::string&, size_t&);
+        void rook_m(Chessboard&, std::string&, size_t&);
+        void queen_m(Chessboard&, std::string&, size_t&);
+        void update_moves(std::vector<Piece>, Chessboard&, std::string, Piece, std::string);
         void check_squares_move(Chessboard&, size_t&, char&, char&);
+        void brq(char, char, Chessboard&, size_t&, std::string&);
 };
 
 #endif

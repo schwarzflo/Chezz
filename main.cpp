@@ -2,25 +2,24 @@
 #include "chessboard.h"
 #include "piece.h"
 
-// add bishop, rook, queen
+// add queen
 
 int main() {
     Chessboard cs;
 
-    //russian game, petrov defense
+    //ruy lopez
 
-    std::cout << cs << std::endl;
     cs.move("e2","e4");
     std::cout << cs << std::endl;
     cs.move("e7","e5");
     std::cout << cs << std::endl;
-    cs.move("g1","f3");
+    cs.move("d1","h5");
     std::cout << cs << std::endl;
-    cs.move("g8","f6");
+    cs.move("d8","h4");
     std::cout << cs << std::endl;
-    cs.move("f3","e5");
+    cs.move("h5","e5");
     std::cout << cs << std::endl;
-    cs.move("d7","d6");
+    cs.move("h4","e4");
     std::cout << cs << std::endl;
 
     return 0; 
