@@ -2,24 +2,26 @@
 #include "chessboard.h"
 #include "piece.h"
 
-// add queen
+// implement check 
 
 int main() {
     Chessboard cs;
-
-    //ruy lopez
 
     cs.move("e2","e4");
     std::cout << cs << std::endl;
     cs.move("e7","e5");
     std::cout << cs << std::endl;
-    cs.move("d1","h5");
+    cs.move("g1","f3");
     std::cout << cs << std::endl;
-    cs.move("d8","h4");
+    cs.move("g8","f6");
     std::cout << cs << std::endl;
-    cs.move("h5","e5");
+    cs.move("f1","e2");
     std::cout << cs << std::endl;
-    cs.move("h4","e4");
+    cs.move("f8","e7");
+    std::cout << cs << std::endl;
+    cs.move("e1","g1");
+    std::cout << cs << std::endl;
+    cs.move("e8","g8");
     std::cout << cs << std::endl;
 
     return 0; 

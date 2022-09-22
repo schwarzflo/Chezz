@@ -17,6 +17,7 @@ class Chessboard {
     std::map<char, int> conv2;
     std::map<char, int> conv3;
     std::map<char, char> conv4;
+    std::map<char, char> conv5;
 
     public:
         Chessboard();
@@ -35,6 +36,7 @@ class Chessboard {
         std::map<char, int> get_conv2();
         std::map<char, int> get_conv3();
         std::map<char, char> get_conv4();
+        std::map<char, char> get_conv5();
 
 
         friend std::ostream& operator<<(std::ostream&, Chessboard);

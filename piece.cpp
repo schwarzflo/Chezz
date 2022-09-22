@@ -50,7 +50,7 @@ void Piece::move(Chessboard* cb, std::string &end, size_t &i) {     // covers al
     }
 }
 
-void Piece::update_moves(std::vector<Piece> temp_vec, Chessboard& cb, std::string new_move, Piece p, std::string capture) {   // write move to list and piece
+void Piece::update_moves(std::vector<Piece>& temp_vec, Chessboard& cb, std::string new_move, Piece p, std::string capture) {   // write move to list and piece
     temp_vec.push_back(p);
     cb.set_all_p(temp_vec);
     cb.add_m(new_move.substr(0,3) + capture + new_move.substr(3,5));
@@ -106,7 +106,7 @@ void Piece::brq(char col_m, char row_m, Chessboard& cb, size_t& i, std::string& 
 }
 
 void Piece::pawn_m(Chessboard& cb, std::string &end, size_t &i) {   // covers all possible pawn movements
-    char col_e{end[0]}, row_e{end[1]}, temp_pos;  // where to move (row end, column end)
+    char col_e{end[0]}, row_e{end[1]}, temp_pos, p_type;  // where to move (row end, column end); p_type is promotion type
     int col_m{(abs(cb.get_conv1()[col_e] - cb.get_conv1()[pos_c]))}; // move distances in column and row squares on board
     int row_m{(abs(cb.get_conv2()[row_e] - cb.get_conv2()[pos_r]))};
     int j;
@@ -119,7 +119,22 @@ void Piece::pawn_m(Chessboard& cb, std::string &end, size_t &i) {   // covers al
     if (row_m == 1 && col_m == 0) { // standard move by 1
         if (j == -1) {
             temp_vec.erase(temp_vec.begin() + i);
-            p = Piece(color,col_e,row_e,'p');
+            if (row_e == '8' || row_e == '1') { // promotion rule
+                while (true) {
+                    std::cout << "Promote to Queen (q), rook (r), knight(n) or bishop(b)?" << std::endl;   
+                    std::cin >> p_type;
+                    if (p_type != 'q' && p_type != 'r' && p_type != 'n' && p_type != 'b') {
+                        std::cout << "Invalid promotion type." << std::endl;
+                    }
+                    else {
+                        p = Piece(color,col_e,row_e,p_type);
+                        break;
+                    }
+                }
+            }
+            else {
+                p = Piece(color,col_e,row_e,'p');
+            }
             update_moves(temp_vec, cb, new_move, p, capture);
         }
         else {
@@ -152,18 +167,61 @@ void Piece::pawn_m(Chessboard& cb, std::string &end, size_t &i) {   // covers al
 
     }
     else {
-        std::cout << "Invalid move pawn (Due to rules)." << std::endl;
+        std::cout << "Invalid pawn move (Due to rules)." << std::endl;
     }
 }
 
 void Piece::king_m(Chessboard& cb, std::string &end, size_t &i) {
-    char col_e{end[0]}, row_e{end[1]};  // where to move (row end, column end)
+    char col_e{end[0]}, row_e{end[1]}, r_c, r_r, r_ec, clr{color};  // where to move (row end, column end); rook column, rook row, rook end column
     int col_m{(abs(cb.get_conv1()[col_e] - cb.get_conv1()[pos_c]))}; // move distances in column and row squares on board
     int row_m{(abs(cb.get_conv2()[row_e] - cb.get_conv2()[pos_r]))};
-    Piece p;
-    std::string new_move = {type, pos_c, pos_r, col_e, row_e};
+    int j,l;
+    bool castling{true};
+    Piece p1, p2;
+    std::string new_move = {type, pos_c, pos_r, col_e, row_e}, capture{""};
+    std::vector<Piece> temp_vec = cb.get_all_p();
+    std::vector<char> ctc = {};     // columns to check for castling
     if (col_m <= 1 && row_m <= 1) {   // valid king moves are contained here
         check_squares_move(cb, i, col_e, row_e);
+    }
+    else if (col_m == 2 && row_m == 0 && m_list.empty()) {    //check for castling possibility
+        r_c = cb.get_conv5()[col_e];    // short or long castle
+        r_r = cb.get_conv5()[color];
+        j = cb.cr_to_idx(r_c,r_r);
+        if (temp_vec[j].m_list.empty()) {   // rook has not moved yet
+            if (r_c == 'a') {   // long
+                ctc = {'b','c','d'};
+                r_ec = 'd';
+            }
+            else {  // short
+                ctc = {'f','g'};
+                r_ec = 'f';
+            } 
+            for (size_t k{}; k < ctc.size(); k++) {
+                l = cb.cr_to_idx(ctc[k],r_r);
+                if (l != -1) {  // a piece is blocking
+                    castling = false;
+                }
+            }
+            if (castling) { // castling can go ahead
+                if (i > j) {    // i gets erased first, as to not change index of l
+                    temp_vec.erase(temp_vec.begin() + i);
+                    temp_vec.erase(temp_vec.begin() + j);
+                }
+                else {
+                    temp_vec.erase(temp_vec.begin() + j);
+                    temp_vec.erase(temp_vec.begin() + i);
+                }
+                p1 = Piece(color,col_e,row_e,'k');
+                update_moves(temp_vec, cb, new_move, p1, capture);
+                p2 = Piece(clr,r_ec,row_e,'r'); // clr instead of color, because due to all_p manip in update_moves, call gets changed!
+                temp_vec.push_back(p2);
+                cb.set_all_p(temp_vec);
+            }
+            else {
+                std::cout << "Castling failed." << std::endl;
+            }
+        }
     }
     else {
         std::cout << "Invalid king move (Due to rules)." << std::endl;

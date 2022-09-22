@@ -28,6 +28,9 @@ Chessboard::Chessboard() {
     conv4 = {
         {'w','b'}, {'b','w'}, {'-','-'}
     };
+    conv5 = {
+        {'w','1'}, {'b','8'},{'g','h'},{'c','a'}
+    };
 }
 
 int Chessboard::cr_to_idx(char nc, char nr) {   // return index in list of pieces for input of coordinates
@@ -114,6 +117,10 @@ std::map<char, int> Chessboard::get_conv3() {
 
 std::map<char, char> Chessboard::get_conv4() {
     return conv4;
+}
+
+std::map<char, char> Chessboard::get_conv5() {
+    return conv5;
 }
 
 
