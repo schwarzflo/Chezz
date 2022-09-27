@@ -2,27 +2,22 @@
 #include "chessboard.h"
 #include "piece.h"
 
-// implement check 
+// check implemented;
+
+// implement check mate; current attempt is incomplete, lacks save by capture and save by blocking.
 
 int main() {
     Chessboard cs;
-
-    cs.move("e2","e4");
-    std::cout << cs << std::endl;
-    cs.move("e7","e5");
-    std::cout << cs << std::endl;
-    cs.move("g1","f3");
-    std::cout << cs << std::endl;
-    cs.move("g8","f6");
-    std::cout << cs << std::endl;
-    cs.move("f1","e2");
-    std::cout << cs << std::endl;
-    cs.move("f8","e7");
-    std::cout << cs << std::endl;
-    cs.move("e1","g1");
-    std::cout << cs << std::endl;
-    cs.move("e8","g8");
-    std::cout << cs << std::endl;
+    std::string move_s, move_e;
+    while (true) {
+        std::cout << cs.get_color() << " to play." << std::endl;
+        std::cin >> move_s;
+        std::cin >> move_e;
+        cs.move(move_s,move_e);
+        if (!cs.get_game_status()) {
+            break;
+        }
+    }
 
     return 0; 
 }

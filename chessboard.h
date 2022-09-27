@@ -13,8 +13,11 @@ class Chessboard {
     std::vector<std::string> all_m = {};
     char color;
     int move_nr;
-    std::map<char, int> conv1;  // move to external h file
-    std::map<char, int> conv2;
+    bool game_ongoing;
+    std::map<char, int> conv_c1;  // move to external h file
+    std::map<int, char> conv_c2;
+    std::map<char, int> conv_r1;  
+    std::map<int, char> conv_r2;
     std::map<char, int> conv3;
     std::map<char, char> conv4;
     std::map<char, char> conv5;
@@ -29,11 +32,19 @@ class Chessboard {
 
         std::vector<Piece> get_all_p();
         void set_all_p(std::vector<Piece>);
+        void set_sp_p(size_t, char, char);
+        void erase_idx(size_t);
         void add_m(std::string);
         char get_color();
         int get_move_nr();
-        std::map<char, int> get_conv1();
-        std::map<char, int> get_conv2();
+        bool get_game_status();
+        bool in_check(std::string, std::string, size_t, char);
+        bool check_mate();
+        std::string get_king_pos(char);
+        std::map<char, int> get_conv_c1();
+        std::map<int, char> get_conv_c2();
+        std::map<char, int> get_conv_r1();
+        std::map<int, char> get_conv_r2();
         std::map<char, int> get_conv3();
         std::map<char, char> get_conv4();
         std::map<char, char> get_conv5();
