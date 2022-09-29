@@ -1,6 +1,5 @@
-#include<string>
-#include<cmath>
-#include <map>
+#include <string>
+#include <cmath>
 #include <vector>
 #include <iomanip>
 #include "piece.h"
@@ -119,13 +118,14 @@ bool Piece::brq(char col_m, char row_m, Chessboard& cb, size_t& i, std::string& 
 }
 
 bool Piece::pawn_m(Chessboard& cb, std::string &end, size_t &i,bool move) {   // covers all possible pawn movements
-    char col_e{end[0]}, row_e{end[1]}, temp_pos, p_type;  // where to move (row end, column end); p_type is promotion type
+    char col_e{end[0]}, row_e{end[1]}, temp_pos, p_type, clr;  // where to move (row end, column end); p_type is promotion type
     int col_m{cb.get_conv_c1()[col_e] - cb.get_conv_c1()[pos_c]}; // move distances in column and row squares on board
     int row_m{cb.get_conv_r1()[row_e] - cb.get_conv_r1()[pos_r]};
     int j;
     bool res{false}, ep{cb.en_passant(pos_c, pos_r)};
     std::string capture{""};
     j = cb.cr_to_idx(col_e,row_e);  // check if there is a piece at target square
+    clr = cb.idx_to_clr(j);
 
     if (col_m == 0 && ((color == 'w' && row_m == 1) || (color == 'b' && row_m == -1))) { // standard move by 1
         if (j == -1) {
@@ -163,7 +163,7 @@ bool Piece::pawn_m(Chessboard& cb, std::string &end, size_t &i,bool move) {   //
             //std:: cout << "/rip/";
         }
     }
-    else if (((color == 'w' && row_m == 1 && abs(col_m) == 1) || (color == 'b' && row_m == -1 && abs(col_m) == 1)) && (j != -1 || ep)) { // capture diagonally (excluding en passant)
+    else if (((color == 'w' && row_m == 1 && abs(col_m) == 1) || (color == 'b' && row_m == -1 && abs(col_m) == 1)) && ((j != -1 && clr == cb.get_conv4()[color]) || ep)) { // capture diagonally (including en passant)
         res = true;
         if (move) {  // dont execute any of the below if "only checking whether move is legit"-mode is enabled (aka move is true)
             capture = "x";

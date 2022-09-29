@@ -69,14 +69,14 @@ std::string Chessboard::get_king_pos(char clr) {
     return "";
 }
 
-void Chessboard::move(std::string start, std::string end) {
+void Chessboard::move(std::string start, std::string end, Playing* pl) {
     bool movable{false}, checking{false}, found{false}, dummy;
     char col{start[0]}, row{start[1]};
     size_t k;
     Piece p1;
     std::string king_pos;
     if (!input_valid(start,end)) {
-        std::cout << "Invalid input." << std::endl;
+        //std::cout << "Invalid input." << std::endl;
         return;
     }
     for (size_t i{}; i < all_p.size(); i++) {   // check whether a piece is on the start position
@@ -87,7 +87,7 @@ void Chessboard::move(std::string start, std::string end) {
                 movable = all_p[i].move(this,end,i,true); // try to move that piece; return whether movable
             }
             else {
-                std::cout << "/kic/" << std::endl;
+                //std::cout << "/kic/" << std::endl;
             }
             break;
         }
@@ -95,7 +95,11 @@ void Chessboard::move(std::string start, std::string end) {
     if (!found) {
         std::cout << "No valid piece at this position." << std::endl;
     }
-    if (movable && !checking) { 
+    if (movable && !checking) { // i can move the piece like i want, and my move does not put me in check
+        if (pl->get_human_pl() != -1) {
+            //std::cout << *this << std::endl; // print moves to console
+            visualize_board();
+        }
         if (check_mate()) {
             std::cout << color << " has delivered check mate to " << conv4[color] << " in " << move_nr << " moves. Game ends." << std::endl;
             game_ongoing = false;
@@ -110,7 +114,6 @@ void Chessboard::move(std::string start, std::string end) {
             }
         }
     }
-    std::cout << *this << std::endl; // print moves to console
 }
 
 bool Chessboard::en_passant(char col, char row) { // check if the last move was a pawn moving up (or down) two squares on a given column, in order to make en passant possible
@@ -182,6 +185,33 @@ bool Chessboard::check_mate() {
 void Chessboard::add_m(std::string new_move) {
     all_m.push_back(new_move);
 };
+
+void Chessboard::visualize_board() {
+    bool found;
+    char type,clr;
+    for (size_t r{8}; r >= 1; r--) {
+        for (size_t c{1}; c <= 8; c++) {
+            found = false;
+            for (auto piece: all_p) {
+                if (piece.get_pos_c() == conv_c2[c] && piece.get_pos_r() == conv_r2[r]) {
+                    found = true;
+                    type = piece.get_type();
+                    clr = piece.get_color();
+                    break;
+                }
+            }
+            if (found) {
+                std::cout << type << clr << " ";
+                found = false;
+            }
+            else {
+                std::cout << "--" << " ";
+            }
+        }
+        std::cout << std::endl;
+    }
+    std::cout << std::endl;
+}
 
 std::vector<Piece> Chessboard::get_all_p() {
     return all_p;
@@ -259,12 +289,11 @@ bool input_valid(std::string start,std::string end) {
     return true;
 }
 
-
 std::ostream& operator<<(std::ostream& os, Chessboard cs) {
-    /*for (auto piece : cs.all_p) {
+    for (auto piece : cs.all_p) {
         os << piece.get_type() << piece.get_pos_c() << piece.get_pos_r() << " " << piece.get_color() << "   ";
     };
-    os << std::endl;*/
+    os << std::endl;
     for (auto move : cs.all_m) {
         os << move << "   ";
     };

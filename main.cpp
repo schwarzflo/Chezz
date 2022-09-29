@@ -1,23 +1,18 @@
 #include <iostream>
 #include "chessboard.h"
 #include "piece.h"
+#include "playing.h"
+#include <cstdlib>
+#include <ctime>
 
-// check implemented;
+// implemented human v human, human v comp, comp v comp; visualisation
 
-// implement check mate; current attempt is incomplete, lacks save by capture and save by blocking.
+// implement stalemate; implement automatic draw (bishop+king v king, king v king, etc..)
 
 int main() {
-    Chessboard cs;
-    std::string move_s, move_e;
-    while (true) {
-        std::cout << cs.get_color() << " to play." << std::endl;
-        std::cin >> move_s;
-        std::cin >> move_e;
-        cs.move(move_s,move_e);
-        if (!cs.get_game_status()) {
-            break;
-        }
-    }
+    
+    Playing pl(0,2);
+    pl.play();
 
     return 0; 
 }
