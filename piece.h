@@ -35,6 +35,7 @@ class Piece {
         bool brq(char, char, Chessboard&, size_t&, std::string&, bool);
 
         friend std::ostream& operator<<(std::ostream&, Piece);
+        friend bool operator!=(Piece&, Piece&);
 };
 
 #endif

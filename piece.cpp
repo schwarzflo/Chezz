@@ -246,7 +246,6 @@ bool Piece::knight_m(Chessboard& cb, std::string &end, size_t &i, bool move) {
     bool res{false};
     Piece p;
     std::string new_move = {type, pos_c, pos_r, col_e, row_e};
-    std::vector<Piece> temp_vec = cb.get_all_p();
     if ((col_m == 2 && row_m == 1) || (col_m == 1 && row_m == 2)) {
         return check_squares_move(cb, i, col_e, row_e, move);
     }
@@ -308,7 +307,15 @@ int sgnm(int x) {   // signum function
 
 std::ostream& operator<<(std::ostream& os, Piece p) {
     
-    os << "Piece: " << p.type << p.pos_c << p.pos_r << " " << p.color << std::endl;
+    os << p.type << p.pos_c << p.pos_r << " " << p.color << "   ";
 
     return os;
+}
+
+bool operator!=(Piece& lhp, Piece& rhp) {
+
+    if (lhp.color == rhp.color && lhp.pos_c == rhp.pos_c && lhp.pos_r == rhp.pos_r && lhp.type == rhp.type) {
+        return false;
+    }
+    return true;
 }

@@ -12,6 +12,7 @@ class Playing;
 
 class Chessboard {
     std::vector<Piece> all_p = {};
+    std::vector<std::vector<Piece>> all_pom = {};    // all pieces over moves
     std::vector<std::string> all_m = {};
     char color;
     int move_nr;
@@ -41,6 +42,8 @@ class Chessboard {
         bool get_game_status();
         bool in_check(std::string, std::string, size_t, char);
         bool check_mate();
+        bool forced_draw();
+        bool move_rep();
         void visualize_board();
         std::string get_king_pos(char);
         std::map<char, int> get_conv_c1();

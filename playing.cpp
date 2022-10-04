@@ -2,6 +2,7 @@
 #include "chessboard.h"
 #include <string>
 #include <random>
+#include <iostream>
 
 Playing::Playing(int h_pl, int c_pl) {  // human vs human; comp vs comp;
     human_pl = h_pl;
@@ -47,8 +48,11 @@ void Playing::play() {
 }
 
 void Playing::human_choice(Chessboard& cb) {
-    std::string choice;
+    std::string choice, dummy;
     std::cout << cb.get_color() << " to play ('{FROM} {TO}')." << std::endl;
+    if (cb.get_move_nr() == 1 && cb.get_color() == 'w') {   // only on first time entering this function, since it otherwise interferes with getline below
+        std::cin.ignore( 1024, '\n' );  // avoid getline to take /n from cin in main
+    }
     std::getline(std::cin, choice);
     cb.move(choice.substr(0,2),choice.substr(3,2),this);
 }

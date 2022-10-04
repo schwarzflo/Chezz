@@ -15,6 +15,7 @@ Chessboard::Chessboard() {
         Piece('b','c','8','b'),Piece('b','f','8','b'),Piece('w','a','1','r'),Piece('w','h','1','r'),
         Piece('b','a','8','r'),Piece('b','h','8','r'),Piece('w','d','1','q'),Piece('b','d','8','q')
     };
+    all_pom = {all_p};  // all pieces over all moves
     all_m = {};
     color = 'w';    // white is first to move
     move_nr = 1;
@@ -96,12 +97,21 @@ void Chessboard::move(std::string start, std::string end, Playing* pl) {
         std::cout << "No valid piece at this position." << std::endl;
     }
     if (movable && !checking) { // i can move the piece like i want, and my move does not put me in check
+        all_pom.push_back(all_p);
         if (pl->get_human_pl() != -1) {
-            //std::cout << *this << std::endl; // print moves to console
+            std::cout << *this << std::endl; // print moves to console
+
             visualize_board();
         }
-        if (check_mate()) {
-            std::cout << color << " has delivered check mate to " << conv4[color] << " in " << move_nr << " moves. Game ends." << std::endl;
+        if (check_mate()) { // checkmate (or stalemate)
+            game_ongoing = false;
+        }
+        else if (forced_draw()) {
+            std::cout << "The game ended in a draw after " << move_nr << " moves, due to insufficient material." << std::endl;
+            game_ongoing = false;
+        }
+        else if (move_rep()) {
+            std::cout << "The game may be claimed draw after threefold repetition and " << move_nr << " moves." << std::endl;
             game_ongoing = false;
         }
         else {
@@ -127,17 +137,19 @@ bool Chessboard::en_passant(char col, char row) { // check if the last move was 
     return false;
 }
 
-bool Chessboard::in_check(std::string start, std::string end, size_t i, char clr) {
+bool Chessboard::in_check(std::string start, std::string end, size_t i, char clr) { // checks whether a move puts king in check; also can be triggered with no move played ("" on start)
     int k{cr_to_idx(end[0],end[1])};
     std::string king_pos;
     bool in_check{false};
-    all_p[i].set_pos_c(end[0]); // assume the move to happen [1]
-    all_p[i].set_pos_r(end[1]);
-    king_pos = get_king_pos(clr);
-    if (k != -1) {  // if there is a piece at the position, temporarily remove it from the board [2], by setting its position to off board
-        all_p[k].set_pos_c('-');
-        all_p[k].set_pos_r('-');
+    if (start != "") {
+        all_p[i].set_pos_c(end[0]); // assume the move to happen [1]
+        all_p[i].set_pos_r(end[1]);
+        if (k != -1) {  // if there is a piece at the position, temporarily remove it from the board [2], by setting its position to off board
+            all_p[k].set_pos_c('-');
+            all_p[k].set_pos_r('-');
+        }
     }
+    king_pos = get_king_pos(clr);
     for (auto p: all_p) {   // attempt to capture the king with all opposing pieces
         if (p.get_color() == get_conv4()[clr]) {    
             if (p.move(this,king_pos,i,false)) {  // capture of king is successful: move is therefore invalid and will be rejected
@@ -147,11 +159,13 @@ bool Chessboard::in_check(std::string start, std::string end, size_t i, char clr
             }
         }
     }
-    all_p[i].set_pos_c(start[0]);  // reset [1], since the move failed
-    all_p[i].set_pos_r(start[1]); 
-    if (k != -1) {
-        all_p[k].set_pos_c(end[0]);
-        all_p[k].set_pos_r(end[1]); // reset [2], i.e. add the temporarily removed piece again
+    if (start != "") {
+        all_p[i].set_pos_c(start[0]);  // reset [1], since the move failed
+        all_p[i].set_pos_r(start[1]); 
+        if (k != -1) {
+            all_p[k].set_pos_c(end[0]); // reset [2], i.e. add the temporarily removed piece again
+            all_p[k].set_pos_r(end[1]); 
+        }
     }
     return in_check;
 }
@@ -179,8 +193,63 @@ bool Chessboard::check_mate() {
             }
         }
     }
-    return cm;
+    if (in_check("","",0,conv4[color])) {   // check mate: no legal move saves us, and king is in check; i is not going to be used here
+        std::cout << color << " has delivered check mate to " << conv4[color] << " in " << move_nr << " move(s). Game ends." << std::endl;
+        return cm;
+    } 
+    else {  // stale mate: no legal move saves us, and king is not in check
+        std::cout << "Stalemate achieved after " << move_nr << " move(s). Game ends." << std::endl;
+        return cm;
+    }
 };
+
+bool Chessboard::forced_draw() {
+    size_t l{all_p.size()};
+    if (l == 2) {   // only kings on board
+        return true;
+    }
+    else if (l == 3) {  // any more than 3 pieces garuantee a possibility of mate (not necessarily forced)
+        for (auto piece: all_p) {
+            if (piece.get_type() == 'n' || piece.get_type() == 'b') {   // kings + knight or kings + bishop
+                return true;
+            }
+        }
+        return false;   // pawn, rook or queen still on board
+    }
+    else {
+        return false;
+    }
+}
+
+bool Chessboard::move_rep() {
+    int count;
+    bool increase;
+
+    if (all_pom.size() < 9) {   // until the 4th full move, no repetition is possible (4*2 + 1 (default))
+        return false;
+    }
+    for (int i{all_pom.size()-1}; i >= 0; i--) {   // loops not optimal, since repetition can not occur after one (half)move
+        count = 0;
+        for (int j{i-1}; j >= 0; j--) {
+            if (all_pom[i].size() == all_pom[j].size()) {   // if board does not have the same length, repitition can not happen
+                increase = true;
+                for (int k{}; k < all_pom[i].size(); k++) {
+                    if (all_pom[i][k] != all_pom[j][k]) {
+                        increase = false;
+                        break;
+                    }
+                }
+                if (increase) {
+                    count++;
+                }
+            }
+        }
+        if (count == 2) {   // the same position was found two more times
+            return true;
+        }
+    }
+    return false;
+}
 
 void Chessboard::add_m(std::string new_move) {
     all_m.push_back(new_move);
@@ -291,8 +360,8 @@ bool input_valid(std::string start,std::string end) {
 
 std::ostream& operator<<(std::ostream& os, Chessboard cs) {
     for (auto piece : cs.all_p) {
-        os << piece.get_type() << piece.get_pos_c() << piece.get_pos_r() << " " << piece.get_color() << "   ";
-    };
+        os << piece << "   ";
+    }
     os << std::endl;
     for (auto move : cs.all_m) {
         os << move << "   ";
